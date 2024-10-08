@@ -1,25 +1,15 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import enum
-import traceback
 from functools import wraps
 
-from common import LoggerFactory
-
-from app.config import ConfigClass
+from app.logger import logger
 from app.models.base_models import APIResponse
 from app.models.base_models import EAPIResponseCode
-
-_logger = LoggerFactory(
-    'internal_error',
-    level_default=ConfigClass.LEVEL_DEFAULT,
-    level_file=ConfigClass.LEVEL_FILE,
-    level_stdout=ConfigClass.LEVEL_STDOUT,
-    level_stderr=ConfigClass.LEVEL_STDERR,
-).get_logger()
 
 
 class APIException(Exception):
@@ -48,7 +38,7 @@ def catch_internal(api_namespace):
                 respon.result = None
                 err = api_namespace + ' ' + str(exce)
                 err_msg = customized_error_template(ECustomizedError.INTERNAL) % err
-                _logger.error(traceback.format_exc())
+                logger.exception('Unexpected error')
                 respon.error_msg = err_msg
                 return respon.json_response()
 

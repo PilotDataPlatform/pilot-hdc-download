@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import json
@@ -15,6 +16,7 @@ from common.object_storage_adaptor.boto3_client import Boto3Client
 from app.commons.download_manager.file_download_manager import FileDownloadClient
 from app.commons.kafka_producer import get_kafka_producer
 from app.config import ConfigClass
+from app.logger import logger
 from app.models.models_data_download import EFileStatus
 from app.resources.download_token_manager import generate_token
 from app.resources.helpers import get_files_folder_recursive
@@ -136,8 +138,8 @@ class DatasetDownloadClient(FileDownloadClient):
             for schema in response.json()['result']:
                 with open(self.tmp_folder + '/openMINDS_' + schema['name'], 'w') as w:
                     w.write(json.dumps(schema['content'], indent=4, ensure_ascii=False))
-        except Exception as e:
-            self.logger.error(f'Fail to create schemas: {str(e)}')
+        except Exception:
+            logger.exception('Fail to create schemas')
             raise
 
     async def generate_hash_code(self) -> str:
@@ -212,7 +214,7 @@ class DatasetDownloadClient(FileDownloadClient):
         folder_tree = await get_files_folder_recursive(
             dataset_code,
             'dataset',
-            self.operator,
+            '',
             self.auth_token,
             zone=1,
         )

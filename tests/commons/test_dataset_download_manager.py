@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import pytest
@@ -15,7 +16,7 @@ async def test_download_client_without_files(httpx_mock, mock_boto3, mock_kafka_
         method='GET',
         url='http://metadata_service/v1/items/search/?container_code=any_code'
         '&container_type=dataset&zone=1&recursive=true&status=ACTIVE&parent_'
-        'path=&owner=me&type=file&page_size=100000',
+        'path=&owner=&type=file&page_size=100000',
         json={'result': []},
     )
 
@@ -37,7 +38,7 @@ async def test_download_client_add_file(httpx_mock, mock_boto3, mock_kafka_produ
         method='GET',
         url='http://metadata_service/v1/items/search/?container_code=any_code'
         '&container_type=dataset&zone=1&recursive=true&status=ACTIVE&parent_'
-        'path=&owner=me&type=file&page_size=100000',
+        'path=&owner=&type=file&page_size=100000',
         json={
             'result': [
                 {
@@ -74,7 +75,7 @@ async def test_download_dataset_add_schemas(httpx_mock, mock_boto3, mock_kafka_p
         method='GET',
         url='http://metadata_service/v1/items/search/?container_code=any_code'
         '&container_type=dataset&zone=1&recursive=true&status=ACTIVE&parent_'
-        'path=&owner=me&type=file&page_size=100000',
+        'path=&owner=&type=file&page_size=100000',
         json={'result': []},
     )
 

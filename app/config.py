@@ -1,10 +1,11 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from logging import ERROR
-from logging import WARN
+import logging
+from functools import lru_cache
 from typing import Any
 from typing import Dict
 
@@ -32,15 +33,14 @@ class Settings(BaseSettings):
 
     APP_NAME: str = 'service_download'
     VERSION: str = '2.0.0'
-    port: int = 5077
-    host: str = '127.0.0.1'
+    HOST: str = '127.0.0.1'
+    PORT: int = 5077
+    WORKERS: int = 1
+    RELOAD: bool = False
     namespace: str
 
-    # log level
-    LEVEL_DEFAULT: int = WARN
-    LEVEL_FILE: int = WARN
-    LEVEL_STDOUT: int = WARN
-    LEVEL_STDERR: int = ERROR
+    LOGGING_LEVEL: int = logging.INFO
+    LOGGING_FORMAT: str = 'json'
 
     # disk mounts
     ROOT_PATH: str
@@ -112,4 +112,10 @@ class Settings(BaseSettings):
         )
 
 
-ConfigClass = Settings()
+@lru_cache(1)
+def get_settings() -> Settings:
+    settings = Settings()
+    return settings
+
+
+ConfigClass = get_settings()

@@ -1,30 +1,24 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import io
 import os
 
 from aiokafka import AIOKafkaProducer
-from common import LoggerFactory
 from fastavro import schema
 from fastavro import schemaless_writer
 
 from app.config import ConfigClass
+from app.logger import logger
 
 
 class KakfaProducer:
 
     producer = None
     schema_path = 'app/commons'
-    logger = LoggerFactory(
-        'KakfaProducer',
-        level_default=ConfigClass.LEVEL_DEFAULT,
-        level_file=ConfigClass.LEVEL_FILE,
-        level_stdout=ConfigClass.LEVEL_STDOUT,
-        level_stderr=ConfigClass.LEVEL_STDERR,
-    ).get_logger()
     connected = False
 
     async def init_connection(self) -> None:
@@ -34,13 +28,13 @@ class KakfaProducer:
         """
 
         if self.producer is None:
-            self.logger.info('Initializing the kafka producer')
+            logger.info('Initializing the kafka producer')
             self.producer = AIOKafkaProducer(bootstrap_servers=ConfigClass.KAFKA_URL)
             try:
                 await self.producer.start()
                 self.connected = True
             except Exception as e:
-                self.logger.error(f'Fail to start kafka producer: {e}')
+                logger.error(f'Fail to start kafka producer: {e}')
 
         return
 
@@ -50,7 +44,7 @@ class KakfaProducer:
             the function for producer to close the kafka connection.
         """
         if self.producer is not None:
-            self.logger.info('Closing the kafka producer')
+            logger.info('Closing the kafka producer')
             await self.producer.stop()
 
     async def _send_message(self, topic: str, content: bytes) -> None:
@@ -66,7 +60,7 @@ class KakfaProducer:
         try:
             await self.producer.send_and_wait(topic, content)
         except Exception as e:
-            self.logger.error(f'Fail to send message: {e}')
+            logger.error(f'Fail to send message: {e}')
             raise e
 
     async def _validate_message(self, schema_name: str, message: dict) -> bytes:
@@ -106,10 +100,10 @@ class KakfaProducer:
             - byte message
         """
 
-        self.logger.info(f'Create activity log to topic: {topic}')
+        logger.info(f'Create activity log to topic: {topic}')
 
         byte_message = await self._validate_message(schema_name, message)
-        self.logger.info(f'byte message is: {byte_message}')
+        logger.info(f'byte message is: {byte_message}')
         await self._send_message(topic, byte_message)
 
         return

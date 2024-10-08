@@ -1,12 +1,12 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import asyncio
 
 import httpx
-from common import LoggerFactory
 from common import ProjectClient
 from common import ProjectNotFoundException
 from common import get_boto3_client
@@ -21,6 +21,7 @@ from app.commons.download_manager.file_download_manager import EmptyFolderError
 from app.commons.download_manager.file_download_manager import InvalidEntityType
 from app.commons.download_manager.file_download_manager import create_file_download_client
 from app.config import ConfigClass
+from app.logger import logger
 from app.models.base_models import APIResponse
 from app.models.base_models import EAPIResponseCode
 from app.models.models_data_download import DatasetPrePOST
@@ -41,13 +42,6 @@ class APIDataDownload:
     """API Data Download Class."""
 
     def __init__(self):
-        self.__logger = LoggerFactory(
-            'api_data_download_v2',
-            level_default=ConfigClass.LEVEL_DEFAULT,
-            level_file=ConfigClass.LEVEL_FILE,
-            level_stdout=ConfigClass.LEVEL_STDOUT,
-            level_stderr=ConfigClass.LEVEL_STDERR,
-        ).get_logger()
         self.project_client = ProjectClient(ConfigClass.PROJECT_SERVICE, ConfigClass.REDIS_URL)
         self.boto3_clients = self._connect_to_object_storage()
 
@@ -60,7 +54,7 @@ class APIDataDownload:
         """
         loop = asyncio.new_event_loop()
 
-        self.__logger.info('Initialize the boto3 clients')
+        logger.info('Initialize the boto3 clients')
         try:
             boto3_internal = loop.run_until_complete(
                 get_boto3_client(
@@ -79,10 +73,9 @@ class APIDataDownload:
                     https=ConfigClass.S3_PUBLIC_HTTPS,
                 )
             )
-        except Exception as e:
-            error_msg = str(e)
-            self.__logger.error('Fail to create connection with boto3: %s', error_msg)
-            raise e
+        except Exception:
+            logger.exception('Fail to create connection with boto3')
+            raise
 
         loop.close()
         return {'boto3_internal': boto3_internal, 'boto3_public': boto3_public}
@@ -129,11 +122,11 @@ class APIDataDownload:
             - 200
         """
 
-        self.__logger.info('Recieving request on /download/pre/')
+        logger.info('Recieving request on /download/pre/')
         response = APIResponse()
         auth_token = Authorization.replace('Bearer ', '')
 
-        self.__logger.info(f'Check container: {data.container_type} {data.container_code}.')
+        logger.info(f'Check container: {data.container_type} {data.container_code}.')
         try:
             if data.container_type == 'project':
                 _ = await self.project_client.get(code=data.container_code)
@@ -150,7 +143,7 @@ class APIDataDownload:
             return response.json_response()
 
         try:
-            self.__logger.info('Initialize the data download client')
+            logger.info('Initialize the data download client')
             download_client = await create_file_download_client(
                 data.files,
                 self.boto3_clients,
@@ -161,13 +154,13 @@ class APIDataDownload:
                 auth_token,
             )
 
-            download_client.logger.info('generate hash token')
+            logger.info('generate hash token')
             hash_code = await download_client.generate_hash_code()
 
-            download_client.logger.info('Init the download job status')
+            logger.info('Init the download job status')
             status_result = await download_client.set_status(EFileStatus.WAITING, payload={'hash_code': hash_code})
 
-            download_client.logger.info(
+            logger.info(
                 f'Starting background job for: {data.container_code}.'
                 f'number of files {len(download_client.files_to_zip)}'
             )
@@ -196,7 +189,6 @@ class APIDataDownload:
         session_id=Header(None),
         Authorization=Header(),
     ) -> JSONResponse:
-
         """
         Summary:
             The API serves as the pre download for whole dataset. All files
@@ -219,7 +211,7 @@ class APIDataDownload:
             - 200
         """
 
-        self.__logger.info('Recieving request on /dataset/download/pre')
+        logger.info('Recieving request on /dataset/download/pre')
         api_response = APIResponse()
         auth_token = Authorization.replace('Bearer ', '')
 
@@ -228,7 +220,7 @@ class APIDataDownload:
             response = client.get(node_query_url)
         dataset_id = response.json().get('id')
 
-        self.__logger.info('Initialize the dataset download client')
+        logger.info('Initialize the dataset download client')
         download_client = await create_dataset_download_client(
             self.boto3_clients,
             data.operator,
@@ -240,7 +232,7 @@ class APIDataDownload:
         )
         hash_code = await download_client.generate_hash_code()
         status_result = await download_client.set_status(EFileStatus.WAITING, payload={'hash_code': hash_code})
-        download_client.logger.info(
+        logger.info(
             f'Starting background job for: {data.dataset_code}.' f'number of files {len(download_client.files_to_zip)}'
         )
         background_tasks.add_task(download_client.background_worker, hash_code)

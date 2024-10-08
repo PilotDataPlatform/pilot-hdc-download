@@ -1,11 +1,11 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import os
 
-from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 from fastapi.responses import RedirectResponse
@@ -14,6 +14,7 @@ from jwt import ExpiredSignatureError
 from jwt.exceptions import DecodeError
 
 from app.config import ConfigClass
+from app.logger import logger
 from app.models.base_models import APIResponse
 from app.models.base_models import EAPIResponseCode
 from app.models.models_data_download import EFileStatus
@@ -36,15 +37,6 @@ _API_NAMESPACE = 'api_data_download'
 class APIDataDownload:
     """API Data Download Class."""
 
-    def __init__(self):
-        self.__logger = LoggerFactory(
-            'api_data_download_v1',
-            level_default=ConfigClass.LEVEL_DEFAULT,
-            level_file=ConfigClass.LEVEL_FILE,
-            level_stdout=ConfigClass.LEVEL_STDOUT,
-            level_stderr=ConfigClass.LEVEL_STDERR,
-        ).get_logger()
-
     @router.get(
         '/download/status/{hash_code}',
         tags=[_API_TAG],
@@ -66,7 +58,7 @@ class APIDataDownload:
 
         response = APIResponse()
 
-        self.__logger.info('Recieving request on /download/status/{hash_code}')
+        logger.info('Recieving request on /download/status/{hash_code}')
         try:
             res_verify_token = await verify_download_token(hash_code)
         except ExpiredSignatureError as e:
@@ -92,13 +84,13 @@ class APIDataDownload:
             container_type=container_type,
             job_id=job_id,
         )
-        self.__logger.info(f'job_fetched list: {job_fetched}')
+        logger.info(f'job_fetched list: {job_fetched}')
 
         if len(job_fetched):
             response.code = EAPIResponseCode.success
             response.result = job_fetched[-1]
         else:
-            self.__logger.error(f'Status not found {res_verify_token} in namespace {ConfigClass.namespace}')
+            logger.error(f'Status not found {res_verify_token} in namespace {ConfigClass.namespace}')
             response.code = EAPIResponseCode.not_found
             response.error_msg = customized_error_template(ECustomizedError.JOB_NOT_FOUND)
 
@@ -123,7 +115,7 @@ class APIDataDownload:
             - file response
         """
 
-        self.__logger.info('Recieving request on /download/{hash_code}')
+        logger.info('Recieving request on /download/{hash_code}')
         response = APIResponse()
 
         try:
@@ -146,7 +138,7 @@ class APIDataDownload:
             response = RedirectResponse(file_path)
         else:
             if not os.path.exists(file_path):
-                self.__logger.error(f'File not found {file_path} in namespace {ConfigClass.namespace}')
+                logger.error(f'File not found {file_path} in namespace {ConfigClass.namespace}')
                 response.code = EAPIResponseCode.not_found
                 response.error_msg = customized_error_template(ECustomizedError.FILE_NOT_FOUND) % file_path
                 return response.json_response()
@@ -168,6 +160,6 @@ class APIDataDownload:
             job_id=res_verify_token.get('job_id'),
         )
 
-        self.__logger.debug('Set the job status')
+        logger.debug('Set the job status')
 
         return response

@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import os
@@ -14,13 +15,13 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 
-from common import LoggerFactory
 from common.object_storage_adaptor.boto3_client import Boto3Client
 from starlette.concurrency import run_in_threadpool
 
 from app.commons.kafka_producer import get_kafka_producer
 from app.commons.locks import bulk_lock_operation
 from app.config import ConfigClass
+from app.logger import logger
 from app.models.models_data_download import EFileStatus
 from app.resources.download_token_manager import generate_token
 from app.resources.helpers import get_files_folder_by_id
@@ -85,7 +86,7 @@ async def create_file_download_client(
 
     if len(download_client.files_to_zip) < 1:
         error_msg = 'Invalid file amount: number of file must greater than 0'
-        download_client.logger.error(error_msg)
+        logger.error(error_msg)
         raise EmptyFolderError(error_msg)
 
     return download_client
@@ -114,14 +115,6 @@ class FileDownloadClient:
         self.folder_download = False
 
         self.boto3_client = None
-
-        self.logger = LoggerFactory(
-            'file_download_manager',
-            level_default=ConfigClass.LEVEL_DEFAULT,
-            level_file=ConfigClass.LEVEL_FILE,
-            level_stdout=ConfigClass.LEVEL_STDOUT,
-            level_stderr=ConfigClass.LEVEL_STDERR,
-        ).get_logger()
 
     async def _set_connection(self, boto3_clients: Dict[str, Boto3Client]):
         """
@@ -215,7 +208,7 @@ class FileDownloadClient:
 
         file_list = []
         if 'folder' == ff_type:
-            self.logger.info(f'Getting folder from geid: {_id}')
+            logger.info(f'Getting folder from geid: {_id}')
 
             self.folder_download = True
 
@@ -307,15 +300,15 @@ class FileDownloadClient:
                 await self.boto3_client.download_object(bucket, obj_path, self.tmp_folder + '/' + obj_path)
 
         except Exception as e:
-            self.logger.error(f'Error in background job: {e}')
+            logger.error(f'Error in background job: {e}')
             payload = {'error_msg': str(e)}
             await self.set_status(EFileStatus.FAILED, payload=payload)
             raise Exception(str(e))
         finally:
-            self.logger.info('Start to unlock the nodes')
+            logger.info('Start to unlock the nodes')
             await bulk_lock_operation(lock_keys, 'read', lock=False)
 
-        self.logger.info('BACKGROUND TASK DONE')
+        logger.info('BACKGROUND TASK DONE')
 
         return None
 
@@ -367,7 +360,7 @@ class FileDownloadClient:
             - None
         """
 
-        self.logger.info('Start to ZIP files')
+        logger.info('Start to ZIP files')
         await run_in_threadpool(shutil.make_archive, self.tmp_folder, 'zip', self.tmp_folder)
 
         return None

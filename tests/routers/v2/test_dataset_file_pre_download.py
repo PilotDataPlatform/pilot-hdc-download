@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import pytest
@@ -23,8 +24,8 @@ async def test_v2_dataset_download_pre_return_200_when_success(
     httpx_mock.add_response(
         method='GET',
         url='http://metadata_service/v1/items/search/?container_code=fake_project_code&'
-        'container_type=dataset&zone=1&recursive=true&status=ACTIVE&parent_path=&owner'
-        '=me&type=file&page_size=100000',
+        'container_type=dataset&zone=1&recursive=true&status=ACTIVE&parent_path=&owner=&'
+        'type=file&page_size=100000',
         json={
             'result': [
                 {
@@ -104,8 +105,8 @@ async def test_v2_dataset_download_pre_empty_dataset_return_200_when_success(
     httpx_mock.add_response(
         method='GET',
         url='http://metadata_service/v1/items/search/?container_code=fake_project_code'
-        '&container_type=dataset&zone=1&recursive=true&status=ACTIVE&parent_path=&own'
-        'er=me&type=file&page_size=100000',
+        '&container_type=dataset&zone=1&recursive=true&status=ACTIVE&parent_path=&owner=&'
+        'type=file&page_size=100000',
         json={'result': []},
     )
 
