@@ -23,7 +23,7 @@ class APIException(Exception):
 
 
 def catch_internal(api_namespace):
-    """decorator to catch internal server error."""
+    """Decorator to catch internal server error."""
 
     def decorator(func):
         @wraps(func)
@@ -60,7 +60,7 @@ class ECustomizedError(enum.Enum):
 
 
 def customized_error_template(customized_error: ECustomizedError):
-    """get error template."""
+    """Get error template."""
     return {
         'FILE_NOT_FOUND': '[File not found] %s.',
         'INVALID_FILE_AMOUNT': '[Invalid file amount] must greater than 0',

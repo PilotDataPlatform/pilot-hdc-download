@@ -6,33 +6,45 @@
     {
       "name": "container_code",
       "type": "string"
-    }, {
+    },
+    {
       "name": "version",
       "default": null,
-      "type": ["string", "null"]
-    }, {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
       "name": "user",
       "type": "string"
-    }, {
+    },
+    {
       "name": "target_name",
-      "type": ["string", "null"]
-    }, {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
       "name": "activity_type",
       "type": "string"
-    }, {
+    },
+    {
       "name": "activity_time",
       "type": {
-	"type": "long",
-	"logicalType": "timestamp-millis"
+        "type": "long",
+        "logicalType": "timestamp-millis"
       }
-    }, {
+    },
+    {
       "name": "changes",
       "type": {
-	"type": "array",
-	"items": {
-		"type": "map",
-		"values": "string"
-	}
+        "type": "array",
+        "items": {
+          "type": "map",
+          "values": "string"
+        }
       }
     }
   ]

@@ -141,7 +141,7 @@ async def test_zip_worker_set_status_SUCCEED_when_success(
     for x in ['geid_1']:
         httpx_mock.add_response(
             method='GET',
-            url='http://metadata_service/v1/item/%s/' % x,
+            url=f'http://metadata_service/v1/item/{x}/',
             json={
                 'result': {
                     'code': 'any_code',
@@ -179,7 +179,7 @@ async def test_zip_worker_set_status_FAILED_when_success(
     for x in ['geid_1', 'geid_2']:
         httpx_mock.add_response(
             method='GET',
-            url='http://metadata_service/v1/item/%s/' % x,
+            url=f'http://metadata_service/v1/item/{x}/',
             json={
                 'result': {
                     'code': 'any_code',
@@ -262,7 +262,7 @@ async def test_zip_worker_raise_exception_when_minio_return_error(
     for x in ['geid_1', 'geid_2']:
         httpx_mock.add_response(
             method='GET',
-            url='http://metadata_service/v1/item/%s/' % x,
+            url=f'http://metadata_service/v1/item/{x}/',
             json={
                 'result': {
                     'code': 'any_code',

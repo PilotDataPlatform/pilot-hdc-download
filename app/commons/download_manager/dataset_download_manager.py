@@ -7,7 +7,6 @@
 import json
 from datetime import datetime
 from datetime import timezone
-from typing import Dict
 
 import aiofiles.os
 import httpx
@@ -25,7 +24,7 @@ DATASET_MESSAGE_SCHEMA = 'dataset.activity.avsc'
 
 
 async def create_dataset_download_client(
-    boto3_clients: Dict[str, Boto3Client],
+    boto3_clients: dict[str, Boto3Client],
     operator: str,
     container_code: str,
     container_id: str,
@@ -162,7 +161,7 @@ class DatasetDownloadClient(FileDownloadClient):
             self.job_id,
         )
 
-    async def update_activity_log(self) -> dict:
+    async def update_activity_log(self) -> None:
         """
         Summary:
             The function will create activity log for dataset file download
@@ -174,17 +173,12 @@ class DatasetDownloadClient(FileDownloadClient):
 
         kp = await get_kafka_producer()
 
-        target_name = self.result_file_name.split('/')[-1]
-        if self.container_code:
-            target_name = f'{self.container_code}/{target_name}'
-        if self.operator:
-            target_name = f'{self.operator}/{target_name}'
         message = {
             'activity_type': 'download',
             'activity_time': datetime.now(tz=timezone.utc),
             'container_code': self.container_code,
             'version': None,
-            'target_name': [target_name],
+            'target_name': self.result_file_name,
             'user': self.operator,
             'changes': [],
         }
@@ -194,8 +188,6 @@ class DatasetDownloadClient(FileDownloadClient):
             DATASET_MESSAGE_SCHEMA,
             ConfigClass.KAFKA_DATASET_ACTIVITY_TOPIC,
         )
-
-        return
 
     async def add_files_to_list(self, dataset_code):
         """
