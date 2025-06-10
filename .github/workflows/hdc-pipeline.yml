@@ -3,6 +3,7 @@ name: HDC ci/cd pipeline
 permissions:
   contents: write
   issues: write
+  pull-requests: write
 
 on:
   push:
