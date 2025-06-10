@@ -6,9 +6,6 @@
 
 from enum import Enum
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -20,11 +17,11 @@ from .base_models import APIResponse
 class PreDataDownloadPOST(BaseModel):
     """Pre download payload model."""
 
-    files: List[Dict[str, Any]]
+    files: list[dict[str, Any]]
     operator: str
     container_code: str
     container_type: str
-    approval_request_id: Optional[UUID] = None
+    approval_request_id: UUID | None = None
 
 
 class DatasetPrePOST(BaseModel):
@@ -146,7 +143,7 @@ class EDataDownloadStatus(Enum):
     SUCCEED = 7
 
     def __str__(self):
-        return '%s' % self.name
+        return f'{self.name}'
 
 
 class EFileStatus(Enum):
@@ -156,4 +153,4 @@ class EFileStatus(Enum):
     FAILED = 3
 
     def __str__(self):
-        return '%s' % self.name
+        return f'{self.name}'

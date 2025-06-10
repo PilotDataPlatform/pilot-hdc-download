@@ -36,6 +36,6 @@ async def bulk_lock_operation(resource_key: list, operation: str, lock: bool = T
     async with httpx.AsyncClient() as client:
         response = await client.request(method, url, json=post_json, timeout=3600)
     if response.status_code != 200:
-        raise ResourceAlreadyInUsed('resource %s already in used' % resource_key)
+        raise ResourceAlreadyInUsed(f'resource {resource_key} already in used')
 
     return response.json()

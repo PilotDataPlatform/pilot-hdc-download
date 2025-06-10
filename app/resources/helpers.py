@@ -4,7 +4,6 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from typing import List
 from uuid import UUID
 
 import httpx
@@ -21,7 +20,7 @@ class ResourceNotFound(Exception):
 
 async def get_files_folder_recursive(
     container_code: str, container_type: str, owner: str, auth_token: str, zone: int = 0, parent_path: str = ''
-) -> List[dict]:
+) -> list[dict]:
     """
     Summary:
         The function will call the api into metadata service and fetch
@@ -56,7 +55,7 @@ async def get_files_folder_recursive(
         headers = {'Authorization': f'Bearer {auth_token}'}
         res = await client.get(url, params=payload, headers=headers)
         if res.status_code != 200:
-            raise Exception('Error when query the folder tree %s' % (str(res.text)))
+            raise Exception(f'Error when query the folder tree {res.text}')
 
     return res.json().get('result', [])
 
@@ -80,16 +79,16 @@ async def get_files_folder_by_id(_id: UUID) -> dict:
     file_folder_object = res.json().get('result', {})
 
     if len(file_folder_object) == 0 or res.status_code == EAPIResponseCode.not_found:
-        raise ResourceNotFound('resource %s does not exist' % _id)
+        raise ResourceNotFound(f'resource {_id} does not exist')
     elif res.status_code != 200:
-        raise Exception('Error when get resource: %s' % res.text)
+        raise Exception(f'Error when get resource: {res.text}')
 
     return file_folder_object
 
 
 async def set_status(
     session_id: str,
-    target_names: List[str],
+    target_names: list[str],
     container_code: str,
     container_type: str,
     status: EFileStatus,
@@ -144,9 +143,9 @@ async def get_status(
     container_code: str,
     container_type: str,
     action_type: str = 'data_download',
-    target_names: List[str] = None,
+    target_names: list[str] = None,
     job_id: str = None,
-) -> List[dict]:
+) -> list[dict]:
     """
     Summary:
         The function will fetch the existing job from redis by the input.

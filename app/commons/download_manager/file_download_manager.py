@@ -11,9 +11,6 @@ import uuid
 from datetime import datetime
 from datetime import timezone
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Tuple
 
 from common.object_storage_adaptor.boto3_client import Boto3Client
 from starlette.concurrency import run_in_threadpool
@@ -28,7 +25,7 @@ from app.resources.helpers import get_files_folder_by_id
 from app.resources.helpers import get_files_folder_recursive
 from app.resources.helpers import set_status
 
-ITEM_MESSAGE_SCHEMA = 'metadata_items_activity.avsc'
+ITEM_MESSAGE_SCHEMA = 'metadata.items.activity.avsc'
 
 
 class EmptyFolderError(Exception):
@@ -40,8 +37,8 @@ class InvalidEntityType(Exception):
 
 
 async def create_file_download_client(
-    files: List[Dict[str, Any]],
-    boto3_clients: Dict[str, Boto3Client],
+    files: list[dict[str, Any]],
+    boto3_clients: dict[str, Boto3Client],
     operator: str,
     container_code: str,
     container_type: str,
@@ -116,7 +113,7 @@ class FileDownloadClient:
 
         self.boto3_client = None
 
-    async def _set_connection(self, boto3_clients: Dict[str, Boto3Client]):
+    async def _set_connection(self, boto3_clients: dict[str, Boto3Client]):
         """
         Summary:
             if number of file is 1 without any folder, the boto3_client
@@ -135,7 +132,7 @@ class FileDownloadClient:
 
         return
 
-    async def _parse_object_location(self, location: str) -> Tuple[str, str]:
+    async def _parse_object_location(self, location: str) -> tuple[str, str]:
         """
         Summary:
             The function will parse out the object location and return
@@ -292,7 +289,7 @@ class FileDownloadClient:
                     bucket = bucket_prefix + nodes.get('container_code')
                 else:
                     bucket = nodes.get('container_code')
-                lock_keys.append('%s/%s/%s' % (bucket, nodes.get('parent_path'), nodes.get('name')))
+                lock_keys.append(f'{bucket}/{nodes.get("parent_path")}/{nodes.get("name")}')
             await bulk_lock_operation(lock_keys, 'read')
 
             for obj in self.files_to_zip:
