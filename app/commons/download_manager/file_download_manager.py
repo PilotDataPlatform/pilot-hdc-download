@@ -338,6 +338,7 @@ class FileDownloadClient:
             'user': self.operator,
             'imported_from': '',
             'changes': [],
+            'network_origin': 'unknown',
         }
 
         await kp.create_activity_log(
