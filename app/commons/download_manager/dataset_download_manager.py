@@ -181,6 +181,7 @@ class DatasetDownloadClient(FileDownloadClient):
             'target_name': self.result_file_name,
             'user': self.operator,
             'changes': [],
+            'network_origin': 'unknown',
         }
 
         await kp.create_activity_log(
