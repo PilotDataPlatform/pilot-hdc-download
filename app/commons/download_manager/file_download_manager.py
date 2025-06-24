@@ -44,6 +44,7 @@ async def create_file_download_client(
     container_type: str,
     session_id: str,
     auth_token: str,
+    network_origin: str,
 ):
     """
     Summary:
@@ -64,6 +65,7 @@ async def create_file_download_client(
         - container_type(string): the type will be dataset or project
         - session_id(string): the unique id to track the user login session
         - auth_token(string): the jwt token from keycloak
+        - network_origin(string): the network origin of the request
 
     Return:
         - FileDownloadClient
@@ -74,6 +76,7 @@ async def create_file_download_client(
         container_type=container_type,
         session_id=session_id,
         auth_token=auth_token,
+        network_origin=network_origin,
     )
 
     for file in files:
@@ -97,6 +100,7 @@ class FileDownloadClient:
         container_type: str,
         session_id: str,
         auth_token: str,
+        network_origin: str,
     ):
         self.job_id = str(uuid.uuid4())
         self.job_status = EFileStatus.WAITING
@@ -108,6 +112,7 @@ class FileDownloadClient:
         self.auth_token = auth_token
         self.session_id = session_id
         self.container_type = container_type
+        self.network_origin = network_origin
 
         self.folder_download = False
 
@@ -338,7 +343,7 @@ class FileDownloadClient:
             'user': self.operator,
             'imported_from': '',
             'changes': [],
-            'network_origin': 'unknown',
+            'network_origin': self.network_origin,
         }
 
         await kp.create_activity_log(

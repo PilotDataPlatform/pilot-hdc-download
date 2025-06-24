@@ -4,11 +4,7 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-import pytest
-
 from app.commons.download_manager.dataset_download_manager import create_dataset_download_client
-
-pytestmark = pytest.mark.asyncio
 
 
 async def test_download_client_without_files(httpx_mock, mock_boto3, mock_kafka_producer, mock_boto3_clients):
@@ -28,6 +24,7 @@ async def test_download_client_without_files(httpx_mock, mock_boto3, mock_kafka_
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
 
     assert len(download_client.files_to_zip) == 0
@@ -64,6 +61,7 @@ async def test_download_client_add_file(httpx_mock, mock_boto3, mock_kafka_produ
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
 
     assert len(download_client.files_to_zip) == 1
@@ -87,6 +85,7 @@ async def test_download_dataset_add_schemas(httpx_mock, mock_boto3, mock_kafka_p
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
 
     httpx_mock.add_response(

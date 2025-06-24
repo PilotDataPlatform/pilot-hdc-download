@@ -15,8 +15,6 @@ from app.commons.download_manager.file_download_manager import InvalidEntityType
 from app.commons.download_manager.file_download_manager import create_file_download_client
 from app.models.models_data_download import EFileStatus
 
-pytestmark = pytest.mark.asyncio
-
 
 async def test_download_client_without_files_should_raise_exception(httpx_mock, mock_boto3, mock_boto3_clients):
     for container_type in ['project', 'dataset']:
@@ -29,6 +27,7 @@ async def test_download_client_without_files_should_raise_exception(httpx_mock, 
                 container_type=container_type,
                 session_id='1234',
                 auth_token='fake_token',
+                network_origin='unknown',
             )
 
 
@@ -59,6 +58,7 @@ async def test_download_client_add_file(httpx_mock, mock_boto3_clients):
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
 
     assert len(download_client.files_to_zip) == 1
@@ -93,6 +93,7 @@ async def test_download_client_add_file_fail_with_name_folder(httpx_mock, mock_b
             container_type='project',
             session_id='1234',
             auth_token='fake_token',
+            network_origin='unknown',
         )
     except InvalidEntityType:
         assert True
@@ -129,6 +130,7 @@ async def test_one_file_set_status_SUCCEED_when_success(
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
     with mock.patch.object(FileDownloadClient, 'set_status') as fake_set:
         await download_client.background_worker('fake_hash')
@@ -167,6 +169,7 @@ async def test_zip_worker_set_status_SUCCEED_when_success(
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
     with mock.patch.object(FileDownloadClient, 'set_status') as fake_set:
         await download_client.background_worker('fake_hash')
@@ -216,6 +219,7 @@ async def test_zip_worker_set_status_FAILED_when_success(
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
 
     try:
@@ -298,6 +302,7 @@ async def test_zip_worker_raise_exception_when_minio_return_error(
         container_type='project',
         session_id='1234',
         auth_token='fake_token',
+        network_origin='unknown',
     )
 
     try:

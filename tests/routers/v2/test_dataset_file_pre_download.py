@@ -4,10 +4,6 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-import pytest
-
-pytestmark = pytest.mark.asyncio
-
 
 async def test_v2_dataset_download_pre_return_200_when_success(
     client, httpx_mock, mock_boto3, mocker, mock_kafka_producer

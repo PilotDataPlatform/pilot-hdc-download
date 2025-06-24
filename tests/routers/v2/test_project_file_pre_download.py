@@ -4,10 +4,7 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-import pytest
 from common import ProjectNotFoundException
-
-pytestmark = pytest.mark.asyncio
 
 
 async def test_v2_download_pre_return_422_when_container_code_and_type_are_missing(client):
