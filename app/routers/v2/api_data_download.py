@@ -12,7 +12,9 @@ from common import ProjectNotFoundException
 from common import get_boto3_client
 from fastapi import APIRouter
 from fastapi import BackgroundTasks
+from fastapi import Depends
 from fastapi import Header
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi_utils import cbv
 
@@ -20,6 +22,7 @@ from app.commons.download_manager.dataset_download_manager import create_dataset
 from app.commons.download_manager.file_download_manager import EmptyFolderError
 from app.commons.download_manager.file_download_manager import InvalidEntityType
 from app.commons.download_manager.file_download_manager import create_file_download_client
+from app.components.request.network import Network
 from app.config import ConfigClass
 from app.logger import logger
 from app.models.base_models import APIResponse
@@ -35,6 +38,12 @@ router = APIRouter()
 
 _API_TAG = 'v2/data-download'
 _API_NAMESPACE = 'api_data_download'
+
+
+def get_network(request: Request) -> Network:
+    """Get network from the request headers."""
+
+    return Network.from_headers(request.headers)
 
 
 @cbv.cbv(router)
@@ -94,6 +103,7 @@ class APIDataDownload:
         background_tasks: BackgroundTasks,
         session_id=Header(None),
         Authorization=Header(),
+        network: Network = Depends(get_network),
     ) -> JSONResponse:
         """
         Summary:
@@ -152,6 +162,7 @@ class APIDataDownload:
                 data.container_type,
                 session_id,
                 auth_token,
+                network.origin,
             )
 
             logger.info('generate hash token')
@@ -188,6 +199,7 @@ class APIDataDownload:
         background_tasks: BackgroundTasks,
         session_id=Header(None),
         Authorization=Header(),
+        network: Network = Depends(get_network),
     ) -> JSONResponse:
         """
         Summary:
@@ -229,6 +241,7 @@ class APIDataDownload:
             'dataset',
             session_id,
             auth_token,
+            network.origin,
         )
         hash_code = await download_client.generate_hash_code()
         status_result = await download_client.set_status(EFileStatus.WAITING, payload={'hash_code': hash_code})

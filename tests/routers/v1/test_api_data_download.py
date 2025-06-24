@@ -7,11 +7,8 @@
 import time
 
 import jwt
-import pytest
 
 from app.config import ConfigClass
-
-pytestmark = pytest.mark.asyncio
 
 
 async def test_v1_download_status_should_return_400_when_when_token_not_verified(client):

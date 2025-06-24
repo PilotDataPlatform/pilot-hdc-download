@@ -31,6 +31,7 @@ async def create_dataset_download_client(
     container_type: str,
     session_id: str,
     auth_token: str,
+    network_origin: str,
 ):
     """
     Summary:
@@ -48,6 +49,7 @@ async def create_dataset_download_client(
         - container_type(string): the type will be dataset or project
         - session_id(string): the unique id to track the user login session
         - auth_token(string): the jwt token from keycloak
+        - network_origin(string): the network origin of the request
 
     Return:
         - DatasetDownloadClient
@@ -60,6 +62,7 @@ async def create_dataset_download_client(
         container_type=container_type,
         session_id=session_id,
         auth_token=auth_token,
+        network_origin=network_origin,
     )
 
     await download_client.add_files_to_list(container_code)
@@ -77,6 +80,7 @@ class DatasetDownloadClient(FileDownloadClient):
         container_type: str,
         session_id: str,
         auth_token: str,
+        network_origin: str,
     ):
         super().__init__(
             operator,
@@ -84,6 +88,7 @@ class DatasetDownloadClient(FileDownloadClient):
             container_type,
             session_id,
             auth_token,
+            network_origin,
         )
 
         self.container_id = container_id
@@ -181,7 +186,7 @@ class DatasetDownloadClient(FileDownloadClient):
             'target_name': self.result_file_name,
             'user': self.operator,
             'changes': [],
-            'network_origin': 'unknown',
+            'network_origin': self.network_origin,
         }
 
         await kp.create_activity_log(
