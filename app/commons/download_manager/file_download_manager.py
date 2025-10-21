@@ -4,6 +4,7 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
+import asyncio
 import os
 import shutil
 import time
@@ -382,14 +383,20 @@ class FileDownloadClient:
             - None
         """
 
+        logger.info(f'Starting background worker for file download with job id {self.job_id}.')
+
         await self.set_status(EFileStatus.RUNNING, payload={'hash_code': hash_code})
 
         if self.folder_download or len(self.files_to_zip) > 1:
             await self._file_download_worker(hash_code)
             await self._zip_worker()
+        else:
+            await asyncio.sleep(2)  # simulate some delay for single file for debugging purpose
 
         await self.set_status(EFileStatus.SUCCEED, payload={'hash_code': hash_code})
 
         await self.update_activity_log()
+
+        logger.info(f'Finished background worker for file download with job id {self.job_id}.')
 
         return None

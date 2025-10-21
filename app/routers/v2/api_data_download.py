@@ -132,7 +132,7 @@ class APIDataDownload:
             - 200
         """
 
-        logger.info('Recieving request on /download/pre/')
+        logger.info('Receiving request on "/download/pre/".')
         response = APIResponse()
         auth_token = Authorization.replace('Bearer ', '')
 
@@ -189,6 +189,7 @@ class APIDataDownload:
             response.error_msg = str(e)
             response.code = EAPIResponseCode.internal_error
 
+        logger.info(f'Sending response on "/download/pre/" with code {response.code}.')
         return response.json_response()
 
     @router.post('/dataset/download/pre', tags=[_API_TAG], summary='Download all files & schemas in a dataset')
@@ -223,7 +224,7 @@ class APIDataDownload:
             - 200
         """
 
-        logger.info('Recieving request on /dataset/download/pre')
+        logger.info('Receiving request on "/dataset/download/pre".')
         api_response = APIResponse()
         auth_token = Authorization.replace('Bearer ', '')
 
@@ -252,4 +253,6 @@ class APIDataDownload:
 
         api_response.result = status_result
         api_response.code = EAPIResponseCode.success
+
+        logger.info(f'Sending response on "/dataset/download/pre" with code {api_response.code}.')
         return api_response.json_response()

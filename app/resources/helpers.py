@@ -9,6 +9,7 @@ from uuid import UUID
 import httpx
 
 from app.config import ConfigClass
+from app.logger import logger
 from app.models.base_models import EAPIResponseCode
 from app.models.models_data_download import EFileStatus
 from app.models.models_item import ItemStatus
@@ -130,10 +131,14 @@ async def set_status(
         'job_id': job_id,
     }
 
+    logger.info(f'Setting job id {job_id} status to {status}.')
+
     async with httpx.AsyncClient() as client:
         res = await client.request(method='POST', url=task_url, json=payload)
         if res.status_code != 200:
             raise Exception(f'Failed to write job status: {res.text}')
+
+    logger.info(f'Successfully set job id {job_id} status to {status}.')
 
     return payload
 

@@ -236,6 +236,9 @@ class DatasetDownloadClient(FileDownloadClient):
         Return:
             - dict: None
         """
+
+        logger.info(f'Starting background worker for dataset download with job id {self.job_id}.')
+
         await self.set_status(EFileStatus.RUNNING, payload={'hash_code': hash_code})
 
         await self._file_download_worker(hash_code)
@@ -247,5 +250,7 @@ class DatasetDownloadClient(FileDownloadClient):
         await self.set_status(EFileStatus.SUCCEED, payload={'hash_code': hash_code})
 
         await self.update_activity_log()
+
+        logger.info(f'Finished background worker for dataset download with job id {self.job_id}.')
 
         return None
