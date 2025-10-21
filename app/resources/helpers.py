@@ -138,7 +138,7 @@ async def set_status(
         if res.status_code != 200:
             raise Exception(f'Failed to write job status: {res.text}')
 
-    logger.info(f'Successfully set job is {job_id} status to {status}.')
+    logger.info(f'Successfully set job id {job_id} status to {status}.')
 
     return payload
 
