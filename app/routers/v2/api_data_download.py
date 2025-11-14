@@ -200,7 +200,7 @@ class APIDataDownload:
         except ResourceNotFound as e:
             response.error_msg = str(e)
             response.code = EAPIResponseCode.not_found
-        except Exception as e:
+        except Exception:
             logger.audit(
                 'Received an unexpected error while preparing files for download.',
                 file_ids=file_ids,
@@ -208,7 +208,8 @@ class APIDataDownload:
                 container_code=data.container_code,
                 container_type=data.container_type,
             )
-            response.error_msg = str(e)
+            logger.exception('Unexpected error while preparing files for download')
+            response.error_msg = 'unexpected error'
             response.code = EAPIResponseCode.internal_error
 
         logger.info(f'Sending response on "/download/pre/" with code {response.code}.')
@@ -287,13 +288,13 @@ class APIDataDownload:
             )
             api_response.result = status_result
             api_response.code = EAPIResponseCode.success
-        except Exception as e:
+        except Exception:
             logger.audit(
                 'Received an unexpected error while preparing a dataset for download.',
                 username=data.operator,
                 container_code=data.dataset_code,
             )
-            logger.error(f'Error on "/dataset/download/pre": {e}')
+            logger.exception('Unexpected error while preparing a dataset for download')
             api_response.error_msg = 'unexpected error'
             api_response.code = EAPIResponseCode.internal_error
 
