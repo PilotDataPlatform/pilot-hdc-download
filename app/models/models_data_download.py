@@ -23,6 +23,9 @@ class PreDataDownloadPOST(BaseModel):
     container_type: str
     approval_request_id: UUID | None = None
 
+    def get_file_ids(self) -> list[str]:
+        return [file['id'] for file in self.files]
+
 
 class DatasetPrePOST(BaseModel):
     """Pre download dataset payload model."""

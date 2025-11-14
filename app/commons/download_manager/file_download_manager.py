@@ -394,6 +394,14 @@ class FileDownloadClient:
 
         await self.update_activity_log()
 
+        logger.audit(
+            'Successfully prepared files for download.',
+            container_code=self.container_code,
+            container_type=self.container_type,
+            username=self.operator,
+            job_id=self.job_id,
+        )
+
         logger.info(f'Finished background worker for file download with job id {self.job_id}.')
 
         return None

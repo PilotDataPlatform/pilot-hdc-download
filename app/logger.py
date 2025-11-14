@@ -6,4 +6,6 @@
 
 import logging
 
-logger = logging.getLogger('pilot.download')
+from common.logging.logging import Logger
+
+logger: Logger = logging.getLogger('pilot.download')

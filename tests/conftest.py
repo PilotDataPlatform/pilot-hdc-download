@@ -166,7 +166,7 @@ async def client(app):
 
 
 @pytest.fixture
-def mock_boto3(monkeypatch):
+def mock_boto3(monkeypatch, app):
     from common.object_storage_adaptor.boto3_client import Boto3Client
 
     class FakeObject:
