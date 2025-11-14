@@ -135,6 +135,7 @@ class APIDataDownload:
         logger.info('Receiving request on "/download/pre/".')
         response = APIResponse()
         auth_token = Authorization.replace('Bearer ', '')
+        file_ids = data.get_file_ids()
 
         logger.info(f'Check container: {data.container_type} {data.container_code}.')
         try:
@@ -153,6 +154,13 @@ class APIDataDownload:
             return response.json_response()
 
         try:
+            logger.audit(
+                'Preparing files for download.',
+                file_ids=file_ids,
+                username=data.operator,
+                container_code=data.container_code,
+                container_type=data.container_type,
+            )
             logger.info('Initialize the data download client')
             download_client = await create_file_download_client(
                 data.files,
@@ -176,7 +184,14 @@ class APIDataDownload:
                 f'number of files {len(download_client.files_to_zip)}'
             )
             background_tasks.add_task(download_client.background_worker, hash_code)
-
+            logger.audit(
+                'Successfully submitted a task for compression of files for download.',
+                file_ids=file_ids,
+                username=data.operator,
+                container_code=data.container_code,
+                container_type=data.container_type,
+                job_id=download_client.job_id,
+            )
             response.result = status_result
             response.code = EAPIResponseCode.success
         except (EmptyFolderError, InvalidEntityType) as e:
@@ -186,6 +201,13 @@ class APIDataDownload:
             response.error_msg = str(e)
             response.code = EAPIResponseCode.not_found
         except Exception as e:
+            logger.audit(
+                'Received an unexpected error while preparing files for download.',
+                file_ids=file_ids,
+                username=data.operator,
+                container_code=data.container_code,
+                container_type=data.container_type,
+            )
             response.error_msg = str(e)
             response.code = EAPIResponseCode.internal_error
 
@@ -233,26 +255,47 @@ class APIDataDownload:
             response = client.get(node_query_url)
         dataset_id = response.json().get('id')
 
-        logger.info('Initialize the dataset download client')
-        download_client = await create_dataset_download_client(
-            self.boto3_clients,
-            data.operator,
-            data.dataset_code,
-            dataset_id,
-            'dataset',
-            session_id,
-            auth_token,
-            network.origin,
-        )
-        hash_code = await download_client.generate_hash_code()
-        status_result = await download_client.set_status(EFileStatus.WAITING, payload={'hash_code': hash_code})
-        logger.info(
-            f'Starting background job for: {data.dataset_code}.' f'number of files {len(download_client.files_to_zip)}'
-        )
-        background_tasks.add_task(download_client.background_worker, hash_code)
-
-        api_response.result = status_result
-        api_response.code = EAPIResponseCode.success
+        try:
+            logger.audit(
+                'Preparing a dataset for download.',
+                username=data.operator,
+                container_code=data.dataset_code,
+            )
+            logger.info('Initialize the dataset download client')
+            download_client = await create_dataset_download_client(
+                self.boto3_clients,
+                data.operator,
+                data.dataset_code,
+                dataset_id,
+                'dataset',
+                session_id,
+                auth_token,
+                network.origin,
+            )
+            hash_code = await download_client.generate_hash_code()
+            status_result = await download_client.set_status(EFileStatus.WAITING, payload={'hash_code': hash_code})
+            logger.info(
+                f'Starting background job for: {data.dataset_code}.'
+                f'number of files {len(download_client.files_to_zip)}'
+            )
+            background_tasks.add_task(download_client.background_worker, hash_code)
+            logger.audit(
+                'Successfully submitted a task for compression of a dataset for download.',
+                username=data.operator,
+                container_code=data.dataset_code,
+                job_id=download_client.job_id,
+            )
+            api_response.result = status_result
+            api_response.code = EAPIResponseCode.success
+        except Exception as e:
+            logger.audit(
+                'Received an unexpected error while preparing a dataset for download.',
+                username=data.operator,
+                container_code=data.dataset_code,
+            )
+            logger.error(f'Error on "/dataset/download/pre": {e}')
+            api_response.error_msg = 'unexpected error'
+            api_response.code = EAPIResponseCode.internal_error
 
         logger.info(f'Sending response on "/dataset/download/pre" with code {api_response.code}.')
         return api_response.json_response()
